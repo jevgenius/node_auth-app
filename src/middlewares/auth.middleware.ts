@@ -1,10 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
+import type {
+  Request as ExRequest,
+  Response as ExResponse,
+  NextFunction,
+} from 'express';
 import { jwt } from '../utils/jwt.js';
 import { usersRepository } from '../entity/users.repository.js';
 
 export function authMiddleware(
-  req: Request,
-  res: Response,
+  req: ExRequest,
+  res: ExResponse,
   next: NextFunction,
 ) {
   const authHeader = req.headers['authorization'] || '';
@@ -26,8 +30,8 @@ export function authMiddleware(
 }
 
 export async function authMiddlewareWithUser(
-  req: Request,
-  res: Response,
+  req: ExRequest,
+  res: ExResponse,
   next: NextFunction,
 ) {
   const authHeader = req.headers['authorization'] || '';
@@ -45,6 +49,7 @@ export async function authMiddlewareWithUser(
 
   // Verify user still exists in database
   const user = await usersRepository.getById((userData as any).id);
+
   if (!user) {
     return res.status(401).json({ message: 'User not found' });
   }

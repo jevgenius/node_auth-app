@@ -7,7 +7,12 @@ function create(
   name?: string,
 ) {
   return db.user.create({
-    data: { email, password, activationToken, name },
+    data: {
+      email,
+      password,
+      activationToken,
+      name,
+    },
   });
 }
 

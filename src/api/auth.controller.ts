@@ -1,4 +1,4 @@
-import { RequestHandler, Response } from 'express';
+import type { RequestHandler, Response as ExResponse } from 'express';
 import bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { usersRepository } from '../entity/users.repository.js';
@@ -6,7 +6,8 @@ import { tokensRepository } from '../entity/tokens.repository.js';
 import { userService } from '../services/user.service.js';
 import { jwt } from '../utils/jwt.js';
 import { mailer } from '../utils/mailer.js';
-async function sendAuthentication(res: Response, user: any) {
+
+async function sendAuthentication(res: ExResponse, user: any) {
   const userData = userService.normalize(user);
   const accessToken = jwt.generateAccessToken(userData);
   const refreshToken = jwt.generateRefreshToken(userData);
@@ -85,6 +86,7 @@ const activate: RequestHandler = async (req, res) => {
   }
 
   await usersRepository.activate(email);
+
   const updatedUser = await usersRepository.getByEmail(email);
 
   if (updatedUser) {
@@ -137,6 +139,7 @@ const refresh: RequestHandler = async (req, res) => {
 
   if (!user || !userData || !token || token.userId !== user.id) {
     res.clearCookie('refreshToken');
+
     return res.status(401).json({ message: 'Invalid token' });
   }
 
@@ -159,6 +162,7 @@ const requestPasswordReset: RequestHandler = async (req, res) => {
   const { email } = req.body;
 
   const emailError = userService.validateEmail(email);
+
   if (emailError) {
     return res.status(400).json({
       errors: { email: emailError },
@@ -167,6 +171,7 @@ const requestPasswordReset: RequestHandler = async (req, res) => {
   }
 
   const user = await usersRepository.getByEmail(email);
+
   if (!user) {
     // Don't reveal if email exists or not
     return res.json({
@@ -186,7 +191,8 @@ const requestPasswordReset: RequestHandler = async (req, res) => {
 };
 
 const resetPassword: RequestHandler = async (req, res) => {
-  const { email, token, password, confirmation } = req.params;
+  const { email, token } = req.params;
+  const { password, confirmation } = req.body;
 
   const errors = {
     password: userService.validatePassword(password),

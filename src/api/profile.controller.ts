@@ -15,6 +15,7 @@ const updateName: RequestHandler = async (req, res) => {
   const user = (req as any).userEntity;
 
   const nameError = userService.validateName(name);
+
   if (nameError) {
     return res.status(400).json({
       errors: { name: nameError },
@@ -48,6 +49,7 @@ const updatePassword: RequestHandler = async (req, res) => {
   }
 
   const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
   if (!isOldPasswordValid) {
     return res.status(400).json({
       errors: { oldPassword: 'Current password is incorrect' },
@@ -83,6 +85,7 @@ const updateEmail: RequestHandler = async (req, res) => {
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
+
   if (!isPasswordValid) {
     return res.status(400).json({
       errors: { password: 'Password is incorrect' },
@@ -91,6 +94,7 @@ const updateEmail: RequestHandler = async (req, res) => {
   }
 
   const existingUser = await usersRepository.getByEmail(email);
+
   if (existingUser && existingUser.id !== user.id) {
     return res.status(400).json({
       errors: { email: 'Email is already taken' },
